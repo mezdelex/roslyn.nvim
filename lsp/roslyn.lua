@@ -17,7 +17,7 @@ local function get_default_cmd()
         or "Microsoft.CodeAnalysis.LanguageServer"
 
     local cmd = {
-        exe,
+        "roslyn-language-server",
         "--logLevel=Information",
         "--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.log.get_filename()),
         "--stdio",
@@ -44,9 +44,9 @@ local function get_default_cmd()
     if razor_extension_path ~= nil then
         cmd = vim.list_extend(cmd, {
             "--razorSourceGenerator="
-                .. vim.fs.joinpath(razor_extension_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll"),
+            .. vim.fs.joinpath(razor_extension_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll"),
             "--razorDesignTimePath="
-                .. vim.fs.joinpath(razor_extension_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets"),
+            .. vim.fs.joinpath(razor_extension_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets"),
             "--extension",
             vim.fs.joinpath(razor_extension_path, "Microsoft.VisualStudioCode.RazorExtension.dll"),
         })
@@ -151,8 +151,8 @@ return {
         end,
     },
     on_exit = {
-        function()
-            vim.g.roslyn_nvim_selected_solution = nil
+        function(_, _, client_id)
+            require("roslyn.store").set(client_id, nil)
             vim.schedule(function()
                 require("roslyn.roslyn_emitter").emit("stopped")
                 vim.notify("Roslyn server stopped", vim.log.levels.INFO, { title = "roslyn.nvim" })
