@@ -1,20 +1,7 @@
-local sysname = vim.uv.os_uname().sysname:lower()
-local iswin = not not (sysname:find("windows") or sysname:find("mingw"))
-
--- Default to roslyn presumably installed by mason if found.
--- Fallback to the same default as `nvim-lspconfig`
 local function get_default_cmd()
-    local roslyn_bin = iswin and "roslyn.cmd" or "roslyn"
-
     -- Fallback in case mason is lazy loaded or MASON env var is just not set
     local expanded_mason = vim.fn.expand("$MASON")
     local mason = expanded_mason == "$MASON" and vim.fs.joinpath(vim.fn.stdpath("data"), "mason") or expanded_mason
-
-    local mason_bin = vim.fs.joinpath(mason, "bin", roslyn_bin)
-
-    local exe = vim.fn.executable(mason_bin) == 1 and mason_bin
-        or vim.fn.executable(roslyn_bin) == 1 and roslyn_bin
-        or "Microsoft.CodeAnalysis.LanguageServer"
 
     local cmd = {
         "roslyn-language-server",
