@@ -1,25 +1,12 @@
-local sysname = vim.uv.os_uname().sysname:lower()
-local iswin = not not (sysname:find("windows") or sysname:find("mingw"))
-
--- Default to roslyn presumably installed by mason if found.
--- Fallback to the same default as `nvim-lspconfig`
 local function get_default_cmd()
-    local roslyn_bin = iswin and "roslyn.cmd" or "roslyn"
-
-    -- Fallback in case mason is lazy loaded or MASON env var is just not set
     local expanded_mason = vim.fn.expand("$MASON")
     local mason = expanded_mason == "$MASON" and vim.fs.joinpath(vim.fn.stdpath("data"), "mason") or expanded_mason
 
-    local mason_bin = vim.fs.joinpath(mason, "bin", roslyn_bin)
-
-    local exe = vim.fn.executable(mason_bin) == 1 and mason_bin
-        or vim.fn.executable(roslyn_bin) == 1 and roslyn_bin
-        or "Microsoft.CodeAnalysis.LanguageServer"
-
     local cmd = {
-        exe,
+        "roslyn-language-server",
         "--logLevel=Information",
         "--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.log.get_filename()),
+        "--autoLoadProjects=true",
         "--stdio",
     }
 
@@ -44,9 +31,9 @@ local function get_default_cmd()
     if razor_extension_path ~= nil then
         cmd = vim.list_extend(cmd, {
             "--razorSourceGenerator="
-                .. vim.fs.joinpath(razor_extension_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll"),
+            .. vim.fs.joinpath(razor_extension_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll"),
             "--razorDesignTimePath="
-                .. vim.fs.joinpath(razor_extension_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets"),
+            .. vim.fs.joinpath(razor_extension_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets"),
             "--extension",
             vim.fs.joinpath(razor_extension_path, "Microsoft.VisualStudioCode.RazorExtension.dll"),
         })
